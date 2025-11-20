@@ -1,7 +1,6 @@
 from telethon import TelegramClient, events
 from telethon.sessions import StringSession
 import os
-import re
 
 api_id = 34390587
 api_hash = "734cef163cc42917b1babcafd9755412"
@@ -38,7 +37,6 @@ def is_signal(text):
 async def handler(event):
     text = event.raw_text.strip()
 
-    # Ignore empty
     if not text:
         return
 
@@ -47,7 +45,6 @@ async def handler(event):
         print("IGNORED:", text)
         return
 
-    # COPY + PASTE SIGNAL
     print("PIPORBIT MV — SIGNAL SENT:", text)
     await client.send_message(TARGET_CHAT_ID, text)
 
