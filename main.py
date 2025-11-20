@@ -13,44 +13,48 @@ session_string = os.getenv("TG_SESSION")
 
 client = TelegramClient(StringSession(session_string), api_id, api_hash)
 
-# Keywords that define a SIGNAL
+
+# -----------------------------------------------------------------------------------
+# SIGNAL FILTER — detects when a message is actually a forex signal
+# -----------------------------------------------------------------------------------
+
 SIGNAL_KEYWORDS = [
-    "buy", "sell", "xau", "gold",
-    "tp", "sl", "entry", 
+    "buy", "sell",
+    "tp", "sl",
+    "xauusd", "gold",
+    "signal",
 ]
 
 def is_signal(text):
-    """Check if message qualifies as a signal"""
-    text_lower = text.lower()
+    text = text.lower()
+    return any(keyword in text for keyword in SIGNAL_KEYWORDS)
 
-    # Check if any keyword is in message
-    if any(keyword in text_lower for keyword in SIGNAL_KEYWORDS):
-        return True
 
-    # Also detect if message contains a price-like number
-    if re.search(r"\b\d{3,5}\b", text):  # detects numbers like 1850, 2304, etc.
-        return True
-
-    return False
-
+# -----------------------------------------------------------------------------------
+# MAIN EVENT — When the bot receives a message in the SOURCE group
+# -----------------------------------------------------------------------------------
 
 @client.on(events.NewMessage(chats=SOURCE_CHAT_ID))
-async def forward_signal(event):
+async def handler(event):
+    text = event.raw_text.strip()
 
-    text = event.message.message
-
+    # Ignore empty
     if not text:
         return
 
-    # FILTERING: Only send if it’s a SIGNAL
+    # FILTERING
     if not is_signal(text):
         print("IGNORED:", text)
         return
 
-    # COPY + PASTE (not forward)
+    # COPY + PASTE SIGNAL
     print("PIPORBIT MV — SIGNAL SENT:", text)
     await client.send_message(TARGET_CHAT_ID, text)
 
+
+# -----------------------------------------------------------------------------------
+# START BOT
+# -----------------------------------------------------------------------------------
 
 print("🔥 PIPORBIT MV — FILTERED SIGNAL BOT RUNNING…")
 client.start()
